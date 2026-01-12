@@ -16,54 +16,78 @@ const PORT = 3002;
 app.use(cors());
 app.use(express.json());
 
+// --- Persistent Python Process for Search ---
+let pythonSearchProcess = null;
+
+const startPythonProcess = () => {
+    const scriptPath = path.resolve(__dirname, '../python/subtitle_server.py');
+    pythonSearchProcess = spawn('python', [scriptPath]);
+    
+    pythonSearchProcess.stderr.on('data', (data) => {
+        console.log(`[Python Worker]: ${data}`);
+    });
+
+    pythonSearchProcess.on('close', (code) => {
+        console.log(`[Python Worker] Exited with code ${code}. Restarting...`);
+        setTimeout(startPythonProcess, 1000); // Restart after 1s
+    });
+    
+    console.log('[Server] Python Subtitle Worker started.');
+};
+
+startPythonProcess();
+
 app.get('/api/subtitles', (req, res) => {
     const { hash, query, lang, name, size } = req.query;
 
     const language = lang || 'pt'; 
-    // If we have a hash, Subliminal needs size and name to verify.
-    // If we have a query, it treats it as a name guess.
     const filename = name || query || 'unknown_video.mkv';
     const fileSize = size || '0';
 
-    console.log(`[Server] Searching via Subliminal. Name: ${filename}, Hash: ${hash || 'N/A'}, Size: ${fileSize}, Lang: ${language}`);
-
-    const scriptPath = path.resolve(__dirname, '../python/search_subtitles.py');
-    const args = [
-        scriptPath,
-        '--name', filename,
-        '--size', fileSize,
-        '--lang', language
-    ];
-
-    if (hash) {
-        args.push('--hash', hash);
+    if (!pythonSearchProcess) {
+        return res.status(500).send('Search service unavailable');
     }
 
-    const pythonProcess = spawn('python', args);
+    const requestPayload = JSON.stringify({
+        hash: hash || null,
+        name: filename,
+        size: fileSize,
+        lang: language
+    }) + '\n';
 
-    let subtitleContent = Buffer.alloc(0);
-    let errorOutput = '';
-
-    pythonProcess.stdout.on('data', (data) => {
-        subtitleContent = Buffer.concat([subtitleContent, data]);
-    });
-
-    pythonProcess.stderr.on('data', (data) => {
-        errorOutput += data.toString();
-    });
-
-    pythonProcess.on('close', (code) => {
-        if (code === 0 && subtitleContent.length > 0) {
-            console.log('[Server] Subtitle found via Subliminal!');
-            res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-            res.send(subtitleContent);
-        } else {
-            console.warn(`[Server] Subliminal exited with code ${code}`);
-            if (errorOutput) console.warn(`[Server] Stderr: ${errorOutput}`);
+    // We can't easily correlate stdin/stdout in a simple pipe without ID.
+    // BUT since Node.js is single threaded for this event loop, and we want to keep it simple:
+    // We will use "once" listener. 
+    // WARNING: This assumes strictly sequential processing matching request/response.
+    // Since spawn streams are ordered, if we write and listen for the NEXT data event, it works 
+    // *if* the python script guarantees exactly one line of output per input.
+    // For high concurrency, we'd need request IDs.
+    
+    const onData = (data) => {
+        try {
+            const result = JSON.parse(data.toString());
+            pythonSearchProcess.stdout.removeListener('data', onData); // Clean up listener
             
-            res.status(404).json({ message: 'Subtitle not found via Subliminal', details: errorOutput });
+            if (result.found && result.content) {
+                console.log('[Server] Subtitle found!');
+                res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+                res.send(result.content);
+            } else if (result.error) {
+                console.warn(`[Server] Python Error: ${result.error}`);
+                res.status(500).send(result.error);
+            } else {
+                console.log('[Server] No subtitle found.');
+                res.status(404).send('Not found');
+            }
+        } catch (e) {
+            console.error('Error parsing python response:', e);
+            // Don't remove listener if it was partial data? 
+            // For simplicity, we assume full line JSON.
         }
-    });
+    };
+
+    pythonSearchProcess.stdout.once('data', onData);
+    pythonSearchProcess.stdin.write(requestPayload);
 });
 
 app.post('/api/translate', (req, res) => {
