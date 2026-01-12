@@ -40,7 +40,7 @@ const MainApp: React.FC = () => {
 
             <div className="h-4 w-px bg-slate-200 dark:bg-slate-700"></div>
             
-            <a href="#" className="text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors">
+            <a href="https://github.com/gustav0br/AI-Video-Subtitle" target="_blank" rel="noopener noreferrer" className="text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors">
                 <Github className="w-5 h-5" />
             </a>
           </div>
