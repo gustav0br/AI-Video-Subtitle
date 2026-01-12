@@ -237,19 +237,19 @@ export const UploadForm: React.FC<UploadFormProps> = ({ onSuccess }) => {
             </div>
 
             <div className="mt-6">
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                     <input 
                         type="text" 
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         placeholder={t('upload.placeholderSearch')}
-                        className="flex-1 px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none"
+                        className="flex-1 px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none w-full"
                         onKeyDown={(e) => e.key === 'Enter' && handleSearchByName()}
                     />
                     <button 
                         onClick={handleSearchByName}
                         disabled={status === ProcessStatus.SEARCHING || !searchQuery.trim()}
-                        className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
                     >
                         {t('upload.btnSearch')}
                     </button>
