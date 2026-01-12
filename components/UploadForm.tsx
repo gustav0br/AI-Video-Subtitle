@@ -126,8 +126,36 @@ export const UploadForm: React.FC<UploadFormProps> = ({ onSuccess }) => {
             });
 
         } else {
-             setStatus(ProcessStatus.ERROR);
-             setError(t('upload.errorEnglishNotFound'));
+             // Fallback Level 2: Try ANY language
+             let anySrt: string | null = null;
+             
+             if (lastSearchType === 'name') {
+                  anySrt = await searchSubtitlesByName(searchQuery, 'All');
+             } else if (lastSearchType === 'hash' && videoFile) {
+                  anySrt = await searchExistingSubtitles(videoFile, 'All');
+             }
+
+             if (anySrt) {
+                setStatus(ProcessStatus.PROCESSING);
+                const progressInterval = startSimulatedProgress();
+                
+                // Translate from Auto to PT-BR
+                const translated = await translateSrtContent(anySrt, 'Portuguese (Brazil)', 'Auto');
+                 
+                clearInterval(progressInterval);
+                setProgress(100);
+                setStatus(ProcessStatus.COMPLETE);
+                
+                onSuccess({
+                    fileName: `[PT-BR] ${filenameBase.replace(/(\.[^.]+$)/, '')}.srt`,
+                    content: translated,
+                    language: 'pt-BR',
+                    source: 'AI'
+                });
+             } else {
+                setStatus(ProcessStatus.ERROR);
+                setError(t('upload.errorEnglishNotFound'));
+             }
         }
     } catch (err) {
         console.error(err);

@@ -11,7 +11,8 @@ const LANG_MAP: Record<string, string> = {
   'Portuguese (Brazil)': 'pt-br',
   'English': 'eng',
   'Spanish': 'spa',
-  'French': 'fra'
+  'French': 'fra',
+  'All': 'all'
 };
 
 export const searchSubtitlesByName = async (query: string, languageLabel: string = 'Portuguese (Brazil)'): Promise<string | null> => {

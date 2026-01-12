@@ -21,10 +21,25 @@ def search(movie_hash, file_name, file_size, lang_code):
         # Map 'pt-br' to babelfish language
         if lang_code.lower() == 'pt-br':
             languages = {Language('por', 'BR')}
-        elif lang_code.lower() == 'en':
+        elif lang_code.lower() in ['en', 'eng']:
             languages = {Language('eng')}
+        elif lang_code.lower() == 'all':
+            # Search for common languages to find *anything*
+            languages = {
+                Language('eng'),
+                Language('spa'),
+                Language('fra'),
+                Language('deu'),
+                Language('ita'),
+                Language('por'),
+                Language('rus'),
+                Language('tur')
+            }
         else:
-            languages = {Language(lang_code)}
+            try:
+                languages = {Language(lang_code)}
+            except:
+                languages = {Language('eng')}
 
         # Use multiple providers
         # 'opensubtitles': The classic one
