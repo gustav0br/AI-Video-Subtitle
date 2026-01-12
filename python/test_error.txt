@@ -1,0 +1,3 @@
+Total subtitle blocks to translate: 2
+Processing in 1 chunks...
+Progress: 100%
