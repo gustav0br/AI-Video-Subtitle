@@ -224,8 +224,8 @@ export const TranslateForm: React.FC<TranslateFormProps> = ({ onSuccess }) => {
                 setError(null);
               }}
               variant="secondary"
-              icon={RefreshCw}
             >
+              <RefreshCw className="w-4 h-4 mr-2" />
               {t('upload.btnTryAgain')}
             </Button>
           </div>
@@ -236,10 +236,9 @@ export const TranslateForm: React.FC<TranslateFormProps> = ({ onSuccess }) => {
         <div className="mt-6 flex justify-center">
           <Button 
             onClick={handleTranslate}
-            size="lg"
             className="w-full sm:w-auto min-w-[200px]"
-            icon={RefreshCw}
           >
+            <RefreshCw className="w-4 h-4 mr-2" />
             {t('translate.btnStart')}
           </Button>
         </div>

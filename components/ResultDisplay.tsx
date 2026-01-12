@@ -40,11 +40,11 @@ export const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, onReset })
               {result.fileName}
             </p>
           </div>
-          <div className="flex gap-3">
-             <Button variant="secondary" onClick={onReset}>
+          <div className="w-full md:w-auto flex flex-col sm:flex-row gap-3">
+             <Button variant="secondary" onClick={onReset} className="w-full sm:w-auto">
               {t('result.btnAnother')}
             </Button>
-            <Button onClick={handleDownload}>
+            <Button onClick={handleDownload} className="w-full sm:w-auto">
               <Download className="w-4 h-4 mr-2" />
               {t('result.btnDownload')}
             </Button>

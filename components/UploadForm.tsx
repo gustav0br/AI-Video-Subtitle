@@ -305,19 +305,19 @@ export const UploadForm: React.FC<UploadFormProps> = ({ onSuccess }) => {
       ) : (
         <div className="bg-slate-50 dark:bg-slate-900 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
           <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center space-x-4">
-              <div className="p-3 bg-indigo-500/10 dark:bg-indigo-500/20 rounded-lg">
+            <div className="flex items-center space-x-4 flex-1 min-w-0">
+              <div className="p-3 bg-indigo-500/10 dark:bg-indigo-500/20 rounded-lg shrink-0">
                 <FileVideo className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
               </div>
-              <div>
-                <p className="font-medium text-slate-900 dark:text-white truncate max-w-[200px] sm:max-w-xs">{videoFile.name}</p>
+              <div className="min-w-0 flex-1">
+                <p className="font-medium text-slate-900 dark:text-white truncate">{videoFile.name}</p>
                 <p className="text-xs text-slate-500 dark:text-slate-400">{(videoFile.size / (1024 * 1024)).toFixed(2)} MB</p>
               </div>
             </div>
             {status !== ProcessStatus.PROCESSING && status !== ProcessStatus.SEARCHING && (
               <button 
                 onClick={clearFile}
-                className="p-2 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-full text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+                className="p-2 ml-2 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-full text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors shrink-0"
                 title={t('upload.remove')}
               >
                 <X className="w-5 h-5" />
